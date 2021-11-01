@@ -2,6 +2,7 @@ import re
 import ee
 import folium
 import geehydro
+import json
 
 service_account = ' ee-service-account@adtech-contino.iam.gserviceaccount.com'
 credentials = ee.ServiceAccountCredentials(service_account, './ee-privatekey.json')
@@ -94,7 +95,7 @@ def main():
         json_to_write.extend([group_dict])
 
     write_blob_from_string(
-        json_to_write,
+        json.dumps(json_to_write),
         "ml_load",
         "landsat_07_historical",
         "text/json",
@@ -103,7 +104,9 @@ def main():
     from google.cloud import bigquery
 
     # Construct a BigQuery client object.
-    client = bigquery.Client()
+    #service_account = ' ee-service-account@adtech-contino.iam.gserviceaccount.com'
+    #credentials = ee.ServiceAccountCredentials(service_account, './ee-privatekey.json')
+    client = bigquery.Client.from_service_account_json('./ee-privatekey.json')
 
     table_id = "adtech-contino.hackathon.landsat-07-historical"
 
@@ -113,12 +116,12 @@ def main():
             bigquery.SchemaField("roi", "STRING"),
             bigquery.SchemaField("water", "DECIMAL"),
             bigquery.SchemaField("forest", "DECIMAL"),
-            bigquery.SchemaField("shrub, grass", "DECIMAL"),
+            bigquery.SchemaField("shrub_grass", "DECIMAL"),
             bigquery.SchemaField("wetlands", "DECIMAL"),
             bigquery.SchemaField("croplands", "DECIMAL"),
             bigquery.SchemaField("urban", "DECIMAL"),
-            bigquery.SchemaField("crop mosaic", "DECIMAL"),
-            bigquery.SchemaField("snow and ice", "DECIMAL"),
+            bigquery.SchemaField("crop_mosaic", "DECIMAL"),
+            bigquery.SchemaField("snow_ice", "DECIMAL"),
             bigquery.SchemaField("barren", "DECIMAL"),
             bigquery.SchemaField("tundra", "DECIMAL")
         ],
@@ -144,7 +147,7 @@ def write_blob_from_string(source, output_bucket_name, output_file_name, file_ty
     process for writing output files for run_id to gcs bucket from an input string
     """
 
-    storage_client = storage.Client()
+    storage_client = storage.Client.from_service_account_json('./ee-privatekey.json')
     bucket = storage_client.get_bucket(output_bucket_name)
     bucket.blob(output_file_name).upload_from_string(source, file_type)
 
