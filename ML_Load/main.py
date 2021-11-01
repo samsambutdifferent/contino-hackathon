@@ -1,9 +1,11 @@
+import re
 import ee
 import folium
 import geehydro
 
 service_account = ' ee-service-account@adtech-contino.iam.gserviceaccount.com'
 credentials = ee.ServiceAccountCredentials(service_account, './ee-privatekey.json')
+keys = ["year","roi","water","forest","shrub, grass","wetlands","croplands","urban","crop mosaic","snow and ice","barren","tundra"]
 groups=['water','forest','forest','forest','forest','forest','shrub, grass','shrub, grass','shrub, grass','shrub, grass','shrub, grass','wetlands','croplands','urban', 'crop mosaic', 'snow and ice', 'barren','tundra']
 def main():
     ee.Initialize(credentials)
@@ -17,7 +19,7 @@ def main():
     end_date = "2020"
     # Load Landsat 5 input imagery.
     landsat = ee.Image(ee.ImageCollection('LANDSAT/LT05/C01/T1_TOA')
-     .filterDate('2000-01-01', '2011-12-31')
+    .filterDate('2000-01-01', '2011-12-31')
     .filterBounds(roi)
     .sort('CLOUD_COVER')
     .first())
@@ -74,23 +76,6 @@ def main():
         # Filter the result to get rid of any null pixels.
         ).filter(ee.Filter.neq('B1', None))
 
-        # Classify the validation data.
-        validated = validation.classify(classifier)
-
-        # Define a palette for the IGBP classification.
-        #igbpPalette = [
-        #  'aec3d4', # water
-        #  '152106', '225129', '369b47', '30eb5b', '387242', # forest
-        #  '6a2325', 'c3aa69', 'b76031', 'd9903d', '91af40',  # shrub, grass
-        #  '111149', # wetlands
-        #  'cdb33b', # croplands
-        #  'cc0013', # urban
-        #  '33280d', # crop mosaic
-        #  'd7cdcc', # snow and ice
-        #  'f7e084', # barren
-        #  '6f6f6f'  # tundra
-        #]
-
         area_classified = ee.Image.pixelArea().divide(1e6).addBands(classified).reduceRegion(
             reducer= ee.Reducer.sum().group(1, 'group'),
             geometry= landsat.geometry(),
@@ -101,7 +86,68 @@ def main():
         get_groups = area_classified.getInfo()
         group_dict ={'year':year, 'roi':', '.join(map(str, input_point))}
         group_dict.update({groups[int(x['group'])]:x['sum'] for x in get_groups['groups']})
+
+        result = keys - group_dict.keys()
+        for r in result:
+            group_dict[r] = 0.0
+
         json_to_write.extend([group_dict])
+
+    write_blob_from_string(
+        json_to_write,
+        "ml_load",
+        "landsat_07_historical",
+        "text/json",
+    )
+
+    from google.cloud import bigquery
+
+    # Construct a BigQuery client object.
+    client = bigquery.Client()
+
+    table_id = "adtech-contino.hackathon.landsat-07-historical"
+
+    job_config = bigquery.LoadJobConfig(
+        schema=[
+            bigquery.SchemaField("year", "INTEGER"),
+            bigquery.SchemaField("roi", "STRING"),
+            bigquery.SchemaField("water", "DECIMAL"),
+            bigquery.SchemaField("forest", "DECIMAL"),
+            bigquery.SchemaField("shrub, grass", "DECIMAL"),
+            bigquery.SchemaField("wetlands", "DECIMAL"),
+            bigquery.SchemaField("croplands", "DECIMAL"),
+            bigquery.SchemaField("urban", "DECIMAL"),
+            bigquery.SchemaField("crop mosaic", "DECIMAL"),
+            bigquery.SchemaField("snow and ice", "DECIMAL"),
+            bigquery.SchemaField("barren", "DECIMAL"),
+            bigquery.SchemaField("tundra", "DECIMAL")
+        ],
+        source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
+    )
+    uri = "gs://ml_load/landsat_07_historical.json"
+
+    load_job = client.load_table_from_uri(
+        uri,
+        table_id,
+        job_config=job_config,
+    )  # Make an API request.
+
+    load_job.result()  # Waits for the job to complete.
+
+    destination_table = client.get_table(table_id)
+    print("Loaded {} rows.".format(destination_table.num_rows))
+
+from google.cloud import storage
+
+def write_blob_from_string(source, output_bucket_name, output_file_name, file_type):
+    """
+    process for writing output files for run_id to gcs bucket from an input string
+    """
+
+    storage_client = storage.Client()
+    bucket = storage_client.get_bucket(output_bucket_name)
+    bucket.blob(output_file_name).upload_from_string(source, file_type)
+
 
 if __name__ == "__main__":
     main()
