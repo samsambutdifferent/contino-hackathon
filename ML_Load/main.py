@@ -3,14 +3,19 @@ import ee
 import folium
 import geehydro
 import json
+import calendar
+import os
+import time
 
 service_account = ' ee-service-account@adtech-contino.iam.gserviceaccount.com'
-credentials = ee.ServiceAccountCredentials(service_account, './ee-privatekey.json')
-keys = ["year","roi","water","forest","shrub, grass","wetlands","croplands","urban","crop mosaic","snow and ice","barren","tundra"]
-groups=['water','forest','forest','forest','forest','forest','shrub, grass','shrub, grass','shrub, grass','shrub, grass','shrub, grass','wetlands','croplands','urban', 'crop mosaic', 'snow and ice', 'barren','tundra']
+#print(os.listdir())
+credentials = ee.ServiceAccountCredentials(service_account, 'ML_Load\ee-privatekey.json')
+keys = ["year","roi","water","forest","shrub_grass","wetlands","croplands","urban","crop_mosaic","snow_ice","barren","tundra"]
+groups=['water','forest','forest','forest','forest','forest','shrub_grass','shrub_grass','shrub_grass','shrub_grass','shrub_grass','wetlands','croplands','urban', 'crop_mosaic', 'snow_ice', 'barren','tundra']
 def main():
-    ee.Initialize(credentials)
-
+    #ee.Initialize(credentials=credentials,project='adtech-contino')
+    ee.Authenticate()
+    ee.Initialize()
     json_to_write = []
     #Define a region of interest as a point.  Change the coordinates
     #to get a classification of any place where there is imagery.
@@ -20,7 +25,7 @@ def main():
     end_date = "2020"
     # Load Landsat 5 input imagery.
     landsat = ee.Image(ee.ImageCollection('LANDSAT/LT05/C01/T1_TOA')
-    .filterDate('2000-01-01', '2011-12-31')
+    .filterDate('2000-01-01', '2019-12-31')
     .filterBounds(roi)
     .sort('CLOUD_COVER')
     .first())
@@ -51,105 +56,77 @@ def main():
 
 
     #for each year, grab the image, classify, then write out the values
-    for year in range(1999, 2020):
+    for year in range(1990, 2020):
+        #for month in range(1,12):
+                    #calendar_days=calendar.monthrange(year, month)[1]
+                    #month_string = "{:02d}".format(month)
+            #for day in range(1,calendar_days):
+                #if day != calendar_days:
+                   # end_day = day +21
+                    #end_day_string = "{:02d}".format(end_day)
+                    #day_string = "{:02d}".format(day)
+                    #print((f'{str(year)}-{month_string}-{day_string}'))
+                    #print((f'{str(year)}-{month_string}-{day_string}'))
+                    landsat = ee.Image(ee.ImageCollection('LANDSAT/LT05/C01/T1_TOA')
+                    .filterDate((f'{str(year)}-01-01'), (f'{str(year)}-12-31'))
+                    .filterBounds(roi)
+                    .first())
 
-        landsat = ee.Image(ee.ImageCollection('LANDSAT/LE07/C01/T1_TOA')
-        .filterDate((f'{str(year)}-01-01'), (f'{str(year)}-12-31'))
-        .filterBounds(roi)
-        .sort('CLOUD_COVER')
-        .first())
+                    # Compute cloud score.
+                    cloudScore = ee.Algorithms.Landsat.simpleCloudScore(landsat).select('cloud')
 
-        # Compute cloud score.
-        cloudScore = ee.Algorithms.Landsat.simpleCloudScore(landsat).select('cloud')
+                    # Mask the input for clouds.  Compute the min of the input mask to mask
+                    # pixels where any band is masked.  Combine that with the cloud mask.
+                    input = landsat.updateMask(landsat.mask().reduce('min'))
+                    input= input.updateMask((cloudScore.lte(50)))
 
-        # Mask the input for clouds.  Compute the min of the input mask to mask
-        # pixels where any band is masked.  Combine that with the cloud mask.
-        input = landsat.updateMask(landsat.mask().reduce('min'))
-        input= input.updateMask((cloudScore.lte(50)))
+                    # Classify the input imagery.
+                    classified = input.classify(classifier)
+                    classified = classified.addBands(modis)
+                    # Sample the input with a different random seed to get validation data.
+                    validation = input.addBands(modis).sample(
+                    numPixels= 5000,
+                    seed= 1
+                    # Filter the result to get rid of any null pixels.
+                    ).filter(ee.Filter.neq('B1', None))
 
-        # Classify the input imagery.
-        classified = input.classify(classifier)
+                    try:
+                        igbpPalette = [
+                            'aec3d4', 
+                            '152106', '225129', '369b47', '30eb5b', '387242',
+                            '6a2325', 'c3aa69', 'b76031', 'd9903d', '91af40',
+                            '111149', 
+                            'cdb33b',
+                            'cc0013',
+                            '33280d',
+                            'd7cdcc',
+                            'f7e084',
+                            '6f6f6f'
+                            ]
+                        
+                        visParams = {'palette':igbpPalette, 'min': 0, 'max': 1, 'bands': ['Land_Cover_Type_1']}
+                        # Display the input and the classification.
+                        #ee.Map.centerObject(roi, 10)
+                        #ee.Map.addLayer(input, {'bands': ['B3', 'B2', 'B1'], 'max': 0.4}, 'landsat')
+                        #ee.Map.addLayer(classified, , 'classification')
 
-        # Sample the input with a different random seed to get validation data.
-        validation = input.addBands(modis).sample(
-        numPixels= 5000,
-        seed= 1
-        # Filter the result to get rid of any null pixels.
-        ).filter(ee.Filter.neq('B1', None))
+                        #image is produced in greyscale
+                        # more investigation needed into why palette not applied
+                        banded_image = classified.visualize(**visParams)
+                        task_config = {'image': banded_image,
+                            'description': f'{str(year)}',
+                            'scale':30,
+                            'maxPixels': 1e13,
+                            'bucket':"hackathon_images"}
+                        task=ee.batch.Export.image.toCloudStorage(**task_config)
+                        task.start()
 
-        area_classified = ee.Image.pixelArea().divide(1e6).addBands(classified).reduceRegion(
-            reducer= ee.Reducer.sum().group(1, 'group'),
-            geometry= landsat.geometry(),
-            scale= 1000
-        )
+                        while task.active() == True:
+                            print('status for task (id: {} status {}).'.format(task.id, task.state))
+                            time.sleep(5)
 
-        outputReducers = ee.List(area_classified.get('groups'))
-        get_groups = area_classified.getInfo()
-        group_dict ={'year':year, 'roi':', '.join(map(str, input_point))}
-        group_dict.update({groups[int(x['group'])]:x['sum'] for x in get_groups['groups']})
-
-        result = keys - group_dict.keys()
-        for r in result:
-            group_dict[r] = 0.0
-
-        json_to_write.extend([group_dict])
-
-    write_blob_from_string(
-        json.dumps(json_to_write),
-        "ml_load",
-        "landsat_07_historical",
-        "text/json",
-    )
-
-    from google.cloud import bigquery
-
-    # Construct a BigQuery client object.
-    #service_account = ' ee-service-account@adtech-contino.iam.gserviceaccount.com'
-    #credentials = ee.ServiceAccountCredentials(service_account, './ee-privatekey.json')
-    client = bigquery.Client.from_service_account_json('./ee-privatekey.json')
-
-    table_id = "adtech-contino.hackathon.landsat-07-historical"
-
-    job_config = bigquery.LoadJobConfig(
-        schema=[
-            bigquery.SchemaField("year", "INTEGER"),
-            bigquery.SchemaField("roi", "STRING"),
-            bigquery.SchemaField("water", "DECIMAL"),
-            bigquery.SchemaField("forest", "DECIMAL"),
-            bigquery.SchemaField("shrub_grass", "DECIMAL"),
-            bigquery.SchemaField("wetlands", "DECIMAL"),
-            bigquery.SchemaField("croplands", "DECIMAL"),
-            bigquery.SchemaField("urban", "DECIMAL"),
-            bigquery.SchemaField("crop_mosaic", "DECIMAL"),
-            bigquery.SchemaField("snow_ice", "DECIMAL"),
-            bigquery.SchemaField("barren", "DECIMAL"),
-            bigquery.SchemaField("tundra", "DECIMAL")
-        ],
-        source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
-    )
-    uri = "gs://ml_load/landsat_07_historical.json"
-
-    load_job = client.load_table_from_uri(
-        uri,
-        table_id,
-        job_config=job_config,
-    )  # Make an API request.
-
-    load_job.result()  # Waits for the job to complete.
-
-    destination_table = client.get_table(table_id)
-    print("Loaded {} rows.".format(destination_table.num_rows))
-
-from google.cloud import storage
-
-def write_blob_from_string(source, output_bucket_name, output_file_name, file_type):
-    """
-    process for writing output files for run_id to gcs bucket from an input string
-    """
-
-    storage_client = storage.Client.from_service_account_json('./ee-privatekey.json')
-    bucket = storage_client.get_bucket(output_bucket_name)
-    bucket.blob(output_file_name).upload_from_string(source, file_type)
+                    except Exception as e:
+                        pass
 
 
 if __name__ == "__main__":
