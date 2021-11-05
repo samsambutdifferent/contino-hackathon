@@ -36,6 +36,16 @@ def land_classifier():
     W = request_obj.get("W")
     Location = request_obj.get("location")
 
+    if request_obj.get("location", "") != "":
+        Location = request_obj.get("location")
+    elif N == 51.5072178 or N == "51.5072178":
+        Location = "london"
+    elif N == 31.230416 or N == "31.230416":
+        Location = "shanghai"
+    elif N == 37.7749295 or N == "37.7749295":
+        Location = "sanfrancisco"
+
+
     bucket_name = "ee-current-images"
     bucket=storage_client.get_bucket(bucket_name)
     # List all objects that satisfy the filter.
