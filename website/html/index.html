@@ -2,12 +2,15 @@
 
 <html>
 <head>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyANALQMep_IvxtWCGS4ADEHYqdXbJq0FAo"></script>
 <title></title>
 <meta charset="utf-8"/>
 <meta content="width=device-width" name="viewport"/>
 <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css"/>
-<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyANALQMep_IvxtWCGS4ADEHYqdXbJq0FAo"></script>
 <script src="address.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
 <style>
 		.bee-form .bee-form-row .bee-field button {
 			font-size: inherit;
@@ -223,7 +226,7 @@
 		}
 
 		.bee-row-2 .bee-row-content {
-			background-image: url('https://d1oco4z2z1fhwp.cloudfront.net/templates/default/3696/background-light-larger_3.jpg');
+			background-image: url('');
 			color: #000
 		}
 
@@ -470,7 +473,7 @@
 <div class="bee-row bee-row-1">
 <div class="bee-row-content no_stack">
 <div class="bee-col bee-col-1 bee-col-w4">
-<div class="bee-block bee-block-1 bee-image"><img alt="Ocean News" class="bee-fixedwidth" src="images/ocean-news.png" style="max-width:80px;"/></div>
+<div class="bee-block bee-block-1 bee-image"><img alt="Sky" class="bee-fixedwidth" src="images/17727577.png" style="max-width:80px;"/></div>
 </div>
 <div class="bee-col bee-col-2 bee-col-w8">
 <div class="bee-block bee-block-1 bee-image"><img alt="" class="bee-center bee-autowidth" src="images/Untitled_1.jpg" style="max-width:800px;"/></div>
@@ -483,7 +486,7 @@
 <div class="bee-block bee-block-1 bee-divider">
 <div class="spacer" style="height:80px;"></div>
 </div>
-<div class="bee-block bee-block-2 bee-image"><img alt="plastic bottle" class="bee-center bee-autowidth" src="images/transparent-bottle.png" style="max-width:474px;"/></div>
+<!-- <div class="bee-block bee-block-2 bee-image"><img alt="plastic bottle" class="bee-center bee-autowidth" src="images/transparent-bottle.png" style="max-width:474px;"/></div> -->
 <div class="bee-block bee-block-3 bee-divider">
 <div class="spacer" style="height:20px;"></div>
 </div>
@@ -492,7 +495,7 @@
 <div class="bee-block bee-block-1 bee-divider">
 <div class="spacer" style="height:130px;"></div>
 </div>
-<div class="bee-block bee-block-2 bee-heading">
+<!-- <div class="bee-block bee-block-2 bee-heading">
 <h1 style="color:#ffffff;direction:ltr;font-family:Arial, Helvetica Neue, Helvetica, sans-serif;font-size:42px;font-weight:normal;letter-spacing:2px;line-height:120%;text-align:left;margin-top:0;margin-bottom:0;">OCEANS OF </h1>
 </div>
 <div class="bee-block bee-block-3 bee-heading">
@@ -507,7 +510,7 @@
 <div class="bee-block bee-block-6 bee-text">
 <div class="bee-text-content" style="line-height: 150%; font-size: 12px; font-family: 'Roboto', Tahoma, Verdana, Segoe, sans-serif; color: #ffffff;">
 <p style="font-size: 14px; line-height: 21px;"><span style="font-size: 16px; line-height: 24px;"><span style="font-size: 18px; line-height: 27px;">Our planet’s oceans produce half of our oxygen, feed a billion people, and are home to some of the most magnificent species on the planet. Climate change, pollution, and damaging industries, on the other hand, put them in peril now more than ever. To fix the issue, we must act immediately.</span> </span></p>
-</div>
+</div> -->
 </div>
 <div class="bee-block bee-block-7 bee-divider">
 <div class="spacer" style="height:135px;"></div>
@@ -545,12 +548,14 @@
 <div class="bee-block bee-block-1 bee-form">
 <form>
 <div class="bee-form-row">
-<div class="bee-field bee-field-id_7akwtd"><label for="id_7akwtd"></label><input id="my-address" name="email"/></div>
+<div class="bee-field bee-field-id_7akwtd"><label for="id_7akwt"></label><input id="my-address"/></div>
 </div>
 <div class="bee-form-row">
-<div class="bee-field bee-field-id_e22zet"><label for="id_e22zet"> </label>
-<div class="bee-button-container"><button id="id_e22zet" name="submit" type="submit" value="SIGN UP">Take me up</button></div>
+<div class="bee-field bee-field-id_e22zet"><label for="id_e22ze"> </label>
+<div class="bee-button-container"><button id="getCords" type="button"  onclick="codeAddress();">Take me up</button></div>
 </div>
+<iframe id="forPostyouradd" data-src="wrapper.html" src="about:blank" width="1200" height="1200" style="background:#ffffff"></iframe>
+
 </div>
 </form>
 </div>
@@ -572,12 +577,10 @@
 <div class="bee-col bee-col-2 bee-col-w8">
 <div class="bee-block bee-block-1 bee-text">
 <div class="bee-text-content" style="line-height: 120%; font-size: 12px; color: #ffffff; font-family: inherit;">
-<p style="font-size: 14px; line-height: 16px; text-align: center;">Over 750,000 people have joined the campaign.</p>
 </div>
 </div>
 <div class="bee-block bee-block-2 bee-text">
 <div class="bee-text-content" style="line-height: 120%; font-size: 12px; color: #ffffff; font-family: inherit;">
-<p style="font-size: 14px; line-height: 16px; text-align: center;"><span style="font-size: 20px; line-height: 24px;">Add your name to join the campaign</span></p>
 </div>
 </div>
 </div>
@@ -596,18 +599,14 @@
 </div>
 <div class="bee-block bee-block-2 bee-text">
 <div class="bee-text-content" style="line-height: 120%; font-size: 12px; font-family: inherit; color: #ffffff;">
-<p style="font-size: 14px; line-height: 16px; text-align: left;"><span style="font-size: 24px; line-height: 28px;"><strong style=""><span style="line-height: 14px;">The microplastics emergency</span></strong></span></p>
 </div>
 </div>
 <div class="bee-block bee-block-3 bee-text">
 <div class="bee-text-content" style="line-height: 150%; font-size: 12px; font-family: inherit; color: #ffffff;">
-<p style="font-size: 14px; line-height: 21px; text-align: left;"><span style="font-size: 16px; line-height: 24px;">The most frequent sort of marine trash found in our oceans and Great Lakes is plastic. Microplastics are little plastics with a length of less than five millimeters. That’s about the size of a sesame seed.</span></p>
 </div>
 </div>
 <div class="bee-block bee-block-4 bee-icons">
 <div class="bee-icon">
-<div class="bee-icon-label-left"><a href="https://www.example.com" target="_self" title="Learn more">Learn More</a></div>
-<div class="bee-icon-image"><a href="https://www.example.com" target="_self" title="Learn more"><img alt="" height="32px" src="images/arrow-right-blue.png" width="auto"/></a></div>
 </div>
 </div>
 </div>
@@ -627,18 +626,14 @@
 </div>
 <div class="bee-block bee-block-2 bee-text">
 <div class="bee-text-content" style="line-height: 120%; font-size: 12px; font-family: inherit; color: #ffffff;">
-<p style="font-size: 14px; line-height: 16px; text-align: left;"><span style="font-size: 24px; line-height: 28px;"><strong style=""><span style="line-height: 14px;">Preserving our blue planet</span></strong></span></p>
 </div>
 </div>
 <div class="bee-block bee-block-3 bee-text">
 <div class="bee-text-content" style="line-height: 150%; font-size: 12px; font-family: inherit; color: #ffffff;">
-<p style="font-size: 14px; line-height: 21px; text-align: left;"><span style="font-size: 16px; line-height: 24px;">Scientists propose a new strategy to rescue our oceans: create a worldwide network of ocean sanctuaries that would keep harmful industries out of millions of square kilometers. But to get world governments on board, we need your help to show why ocean conservation is so important.</span></p>
 </div>
 </div>
 <div class="bee-block bee-block-4 bee-icons">
 <div class="bee-icon">
-<div class="bee-icon-label-left"><a href="#petition" target="_self" title="Get Involved">Sign the petition</a></div>
-<div class="bee-icon-image"><a href="#petition" target="_self" title="Get Involved"><img alt="" height="32px" src="images/arrow-right-blue.png" width="auto"/></a></div>
 </div>
 </div>
 </div>
@@ -652,19 +647,14 @@
 </div>
 <div class="bee-block bee-block-2 bee-text">
 <div class="bee-text-content" style="line-height: 120%; font-size: 12px; font-family: inherit; color: #ffffff;">
-<p style="font-size: 14px; line-height: 16px; text-align: left;"><span style="font-size: 24px; line-height: 28px;"><strong style=""><span style="line-height: 14px;">“I saw destruction first-hand”</span></strong></span></p>
 </div>
 </div>
-<div class="bee-block bee-block-3 bee-image"><a href="https://www.example.com"><img alt="Sound Wave" class="bee-fixedwidth" src="images/waveform_1.png" style="max-width:210px;"/></a></div>
 <div class="bee-block bee-block-4 bee-text">
 <div class="bee-text-content" style="line-height: 150%; font-size: 12px; font-family: inherit; color: #ffffff;">
-<p style="font-size: 14px; line-height: 21px; text-align: left;"><span style="font-size: 16px; line-height: 24px;">Listen to our podcast with diver Jake Mills, as he describes the dangers plastics pose to marine ecosystems and how we can work together to ensure a biodiverse, thriving ocean for future generations. </span></p>
 </div>
 </div>
 <div class="bee-block bee-block-5 bee-icons">
 <div class="bee-icon">
-<div class="bee-icon-label-left"><a href="https://www.example.com" target="_self" title="Listen to the podcast">Listen Now</a></div>
-<div class="bee-icon-image"><a href="https://www.example.com" target="_self" title="Listen to the podcast"><img alt="" height="32px" src="images/arrow-right-blue.png" width="auto"/></a></div>
 </div>
 </div>
 </div>
@@ -712,15 +702,11 @@
 <div class="bee-block bee-block-2 bee-menu">
 <nav class="bee-menu">
 <ul class="bee-horizontal">
-<li><a href="https://www.example.com" target="_self" title="">NEWS</a></li><span>|</span>
-<li><a href="https://www.example.com" target="_self" title="">DONATE</a></li><span>|</span>
-<li><a href="https://www.example.com" target="_self" title="">SUBSCRIBE</a></li>
 </ul>
 </nav>
 </div>
 <div class="bee-block bee-block-3 bee-social">
-<div class="content"><span class="icon" style="padding:0 10px 0 10px;"><a href="https://www.facebook.com/"><img alt="Facebook" src="images/facebook2x.png" title="Facebook"/></a></span><span class="icon" style="padding:0 10px 0 10px;"><a href="https://twitter.com/"><img alt="Twitter" src="images/twitter2x.png" title="Twitter"/></a></span><span class="icon" style="padding:0 10px 0 10px;"><a href="https://instagram.com/"><img alt="Instagram" src="images/instagram2x.png" title="Instagram"/></a></span><span class="icon" style="padding:0 10px 0 10px;"><a href="https://www.linkedin.com/"><img alt="LinkedIn" src="images/linkedin2x.png" title="LinkedIn"/></a></span></div>
-</div>
+
 <div class="bee-block bee-block-4 bee-divider">
 <div class="spacer" style="height:40px;"></div>
 </div>
@@ -732,8 +718,6 @@
 <div class="bee-col bee-col-1 bee-col-w12">
 <div class="bee-block bee-block-1 bee-icons">
 <div class="bee-icon">
-<div class="bee-icon-image"><a href="https://www.designedwithbee.com/" target="_blank" title="Designed with BEE"><img alt="Designed with BEE" height="32px" src="images/bee.png" width="auto"/></a></div>
-<div class="bee-icon-label-right"><a href="https://www.designedwithbee.com/" target="_blank" title="Designed with BEE">Designed with BEE</a></div>
 </div>
 </div>
 </div>
