@@ -21,6 +21,7 @@ function initialize() {
 function codeAddress() {
     geocoder = new google.maps.Geocoder();
     var address = document.getElementById("my-address").value;
+    localStorage.setItem("address",address)
     geocoder.geocode( { 'address': address}, function(results, status) {
       if (status == google.maps.GeocoderStatus.OK) {
         localStorage.setItem("latitude",results[0].geometry.location.lat())

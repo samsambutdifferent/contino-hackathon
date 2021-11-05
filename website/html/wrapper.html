@@ -4,7 +4,7 @@
     
 axios({
     method: 'POST',
-    url: 'https://europe-west2-adtech-contino.cloudfunctions.net/eeLandClassifier',
+    url: 'https://land-classifier-un3qbl2tyq-ew.a.run.app',
     mode: 'no-cors',
     headers: {
         
@@ -14,14 +14,27 @@ axios({
       },
     data: {
         "N": localStorage.getItem('latitude'),
-        "W": localStorage.getItem('longitude')
+        // "W": localStorage.getItem('longitude')
+        
+        
     }
     })
     .then((response) => {
+        console.log("lat"+localStorage.getItem('latitude'))
+        console.log("long"+localStorage.getItem('longitude'))
         console.log(response.data);
+        document.getElementById('image').src =  response.data
+        localStorage.removeItem('latitude')
+        localStorage.removeItem('longitude')
+        localStorage.removeItem('address')
     })
     .catch((error) => {
         console.log(error);
     });
 
 </script>
+<html>
+    <body>
+        <img id="image" src="" /> 
+    </body>
+</html>
