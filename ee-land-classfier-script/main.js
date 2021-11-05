@@ -1,29 +1,17 @@
-/**
- * Responds to any HTTP request.
- *
- * @param {!express:Request} req HTTP request context.
- * @param {!express:Response} res HTTP response context.
- */
 
- const ee = require('@google/earthengine');
- const PRIVATE_KEY = require('./privatekey.json');
- 
- year_start = "2011"
- year_end = "2013"
+const ee = require('@google/earthengine');
+const PRIVATE_KEY = require('./privatekey.json');
 
+x = 121.4737
+y = 31.2304
+year_start = "2011"
+year_end = "2013"
 
- exports.eeLandClassifier = (req, res) => {
+ee.data.authenticateViaPrivateKey(PRIVATE_KEY, () => {
+  ee.initialize(null, null, () => {
 
-  let N = req.body.N
-  let W = req.body.W
+      var roi = ee.Geometry.Point(x, y);
 
-  let message = 'N:' + N + " W: " +  W;
-
-  ee.data.authenticateViaPrivateKey(PRIVATE_KEY, () => {
-    ee.initialize(null, null, () => {
-  
-      var roi = ee.Geometry.Point(W, N);
-  
       // Load Landsat 5 input imagery.
       var landsat = ee.Image(ee.ImageCollection('LANDSAT/LT05/C01/T1_TOA')
         // Filter to get only one year of images.
@@ -101,12 +89,5 @@
       // Map.centerObject(roi, 10);
       // Map.addLayer(input, {bands: ['B3', 'B2', 'B1'], max: 0.4}, 'landsat');
       // Map.addLayer(classified, {palette: igbpPalette, min: 0, max: 17}, 'classification');
-  
-  
-    });
   });
- 
-
-
-  res.status(200).send(message);
-};
+});

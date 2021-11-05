@@ -1,0 +1,9 @@
+key.json
+.vscode
+.pyc
+sftp_staging/
+__pycache__/
+private.env
+env/
+tmp/
+
