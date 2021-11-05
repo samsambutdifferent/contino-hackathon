@@ -1,0 +1,27 @@
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script> 
+
+<script>
+    
+axios({
+    method: 'POST',
+    url: 'https://europe-west2-adtech-contino.cloudfunctions.net/eeLandClassifier',
+    mode: 'no-cors',
+    headers: {
+        
+        'Content-Type' :  'application/json'
+        
+
+      },
+    data: {
+        "N": localStorage.getItem('latitude'),
+        "W": localStorage.getItem('longitude')
+    }
+    })
+    .then((response) => {
+        console.log(response.data);
+    })
+    .catch((error) => {
+        console.log(error);
+    });
+
+</script>
